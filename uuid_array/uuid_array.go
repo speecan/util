@@ -54,26 +54,14 @@ func (a UUIDArray) Value() (driver.Value, error) {
 	if a == nil {
 		return nil, nil
 	}
-
-	if n := len(a); n > 0 {
-		// There will be at least two curly brackets, 2*N bytes of quotes,
-		// and N-1 bytes of delimiters.
-		b := make([]byte, 1, 1+3*n)
-		b[0] = '{'
-
-		cc := [16]byte(a[0])
-		b = append(b, cc[:]...)
-
-		for i := 1; i < n; i++ {
-			b = append(b, ',')
-			ccc := [16]byte(a[i])
-			b = append(b, ccc[:]...)
+	res := ""
+	for i, v := range a {
+		if i != 0 {
+			res += ","
 		}
-
-		return string(append(b, '}')), nil
+		res += v.String()
 	}
-
-	return "{}", nil
+	return "{" + res + "}", nil
 }
 func scanLinearArray(src, del []byte, typ string) (elems [][]byte, err error) {
 	dims, elems, err := parseArray(src, del)
