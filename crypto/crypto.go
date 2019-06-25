@@ -66,3 +66,13 @@ func DecryptByGCM(key []byte, cipherText []byte) (string, error) {
 	}
 	return string(plainByte), nil
 }
+
+// DummyBinary returns dummy data
+func DummyBinary(length uint64) []byte {
+	b := make([]byte, 0)
+	for uint64(len(b)) < length {
+		str := Random(128)
+		b = append(b, []byte(str)...)
+	}
+	return b
+}
