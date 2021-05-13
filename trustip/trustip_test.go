@@ -5,6 +5,7 @@ import (
 )
 
 func TestIsContained(t *testing.T) {
+	t.Parallel()
 	list := []string{
 		"192.168.100.50",
 		"192.168.100.0/24",

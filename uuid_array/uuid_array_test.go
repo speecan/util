@@ -7,6 +7,7 @@ import (
 )
 
 func TestValue(t *testing.T) {
+	t.Parallel()
 	x := UUIDArray{uuid.New()}
 	res, err := x.Value()
 	if err != nil {

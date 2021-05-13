@@ -6,10 +6,15 @@ import (
 )
 
 func TestRandom(t *testing.T) {
-	t.Errorf(Random(32))
+	t.Parallel()
+	res := Random(32)
+	if len(res) != 32 {
+		t.Fatal("length must be 32")
+	}
 }
 
 func TestGCM(t *testing.T) {
+	t.Parallel()
 	key := []byte("2pdMiskZXe928M6T7TqmjwoQBhhVcJiv")
 	plainText := "this is test"
 	cipherText, err := EncryptByGCM(key, plainText)

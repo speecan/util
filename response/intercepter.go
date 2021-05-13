@@ -24,7 +24,6 @@ func (x Intercepter) Write(buf []byte) (int, error) {
 
 // WriteHeader is dummy
 func (Intercepter) WriteHeader(x int) {
-	return
 }
 
 // CloseNotify is dummy

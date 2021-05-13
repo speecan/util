@@ -7,6 +7,7 @@ import (
 )
 
 func TestRemoveDuplicate(t *testing.T) {
+	t.Parallel()
 	u1 := uuid.New()
 	u2 := uuid.New()
 	value := UUIDArray{u1, u2, uuid.MustParse(u1.String()), uuid.MustParse(u1.String())}
