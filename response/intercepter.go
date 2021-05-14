@@ -27,7 +27,7 @@ func (x *Intercepter) Header() http.Header {
 // Write will intercept bytes
 func (x Intercepter) Write(buf []byte) (int, error) {
 	x.Listener <- buf
-	return 0, nil
+	return len(buf), nil
 }
 
 // WriteHeader will set own status code
