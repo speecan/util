@@ -1,15 +1,23 @@
 package response
 
-import "net/http"
+import (
+	"io"
+	"net/http"
+)
 
-// Intercepter will intercept response.writer
+// Intercepter will intercept http.responseWriter
 type Intercepter struct {
-	header   http.Header
-	Listener chan []byte
+	header     http.Header
+	Listener   chan []byte
+	StatusCode int
+}
+
+func NewInterceptor(q chan []byte) *Intercepter {
+	return &Intercepter{Listener: q}
 }
 
 // Header is returning header map
-func (x Intercepter) Header() http.Header {
+func (x *Intercepter) Header() http.Header {
 	if x.header == nil {
 		x.header = map[string][]string{}
 	}
@@ -22,11 +30,19 @@ func (x Intercepter) Write(buf []byte) (int, error) {
 	return 0, nil
 }
 
-// WriteHeader is dummy
-func (Intercepter) WriteHeader(x int) {
+// WriteHeader will set own status code
+func (x *Intercepter) WriteHeader(statusCode int) {
+	x.StatusCode = statusCode
 }
 
 // CloseNotify is dummy
 func (Intercepter) CloseNotify() <-chan bool {
 	return make(chan bool)
 }
+
+var (
+	// check interface
+	_ http.ResponseWriter = &Intercepter{}
+	_ io.Writer           = &Intercepter{}
+	_ http.CloseNotifier  = &Intercepter{}
+)
