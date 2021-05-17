@@ -1,13 +1,13 @@
 package response
 
 import (
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	echo "github.com/labstack/echo/v4"
 )
@@ -117,8 +117,9 @@ func TestHTTPServer(t *testing.T) {
 					w8 <- err
 					return
 				}
+				w.ReadClose()
 				//
-				fmt.Println(string(body)) // Save to database
+				// fmt.Println(len(body)) // Save to database
 				c.Response().Writer = orgWriter
 				for k, v := range w.Header() {
 					for _, s := range v {
@@ -132,12 +133,21 @@ func TestHTTPServer(t *testing.T) {
 			if err := next(c); err != nil {
 				return err
 			}
+			w.WriteClose()
 			return <-w8
 		}
 	}
 	e.GET("/dummy", func(c echo.Context) error {
-		sr := strings.NewReader(strings.Repeat("foobar12", 128*10))
-		return c.Stream(http.StatusOK, "application/octet-stream", sr)
+		pr, pw := io.Pipe()
+		defer pr.Close()
+		go func() {
+			defer pw.Close()
+			for i := 0; i < 100; i++ {
+				io.Copy(pw, strings.NewReader(strings.Repeat("foobar12", 128*1)))
+				time.Sleep(10 * time.Millisecond)
+			}
+		}()
+		return c.Stream(http.StatusOK, "application/octet-stream", pr)
 	}, mid)
 	s := httptest.NewServer(e)
 	resp, err := s.Client().Get(s.URL + "/dummy")
@@ -149,5 +159,7 @@ func TestHTTPServer(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Fatal(string(b))
+	if len(b) != 102400 {
+		t.Fatal("invalid length:", len(b))
+	}
 }
