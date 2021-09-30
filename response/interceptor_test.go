@@ -14,7 +14,7 @@ import (
 
 func TestInterceptor(t *testing.T) {
 	// q := make(chan []byte)
-	x := NewInterceptor()
+	x := NewInterceptor(nil)
 	w8 := make(chan struct{})
 
 	t.Run("write response", func(tt *testing.T) {
@@ -50,10 +50,35 @@ func TestInterceptor(t *testing.T) {
 	})
 }
 
+func TestInterceptorChan(t *testing.T) {
+	q := make(chan []byte)
+	x := NewInterceptor(q)
+	w8 := make(chan struct{})
+
+	t.Run("write response", func(tt *testing.T) {
+		tt.Parallel()
+		r := echo.NewResponse(x, nil)
+		if _, err := r.Write([]byte("foobar")); err != nil {
+			tt.Fatal(err)
+		}
+		<-w8
+	})
+
+	t.Run("assert response", func(tt *testing.T) {
+		tt.Parallel()
+		go io.Copy(ioutil.Discard, x)
+		b := <-q
+		if string(b) != "foobar" {
+			tt.Fatal("response body was unexpected,", string(b))
+		}
+		w8 <- struct{}{}
+	})
+}
+
 func TestInterceptorWithPipe(t *testing.T) {
 	// q := make(chan []byte, 10240)
 	// respr, respw := io.Pipe()
-	x := NewInterceptor()
+	x := NewInterceptor(nil)
 	w8 := make(chan struct{})
 	pr, pw := io.Pipe()
 
@@ -108,7 +133,7 @@ func TestHTTPServer(t *testing.T) {
 	mid := func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			orgWriter := c.Response().Writer
-			w := NewInterceptor()
+			w := NewInterceptor(nil)
 			c.Response().Writer = w
 			w8 := make(chan error)
 			go func() {

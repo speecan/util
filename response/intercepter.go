@@ -12,11 +12,21 @@ type Intercepter struct {
 
 	pr *io.PipeReader
 	pw *io.PipeWriter
+
+	listener chan []byte
 }
 
-func NewInterceptor() *Intercepter {
+func NewInterceptor(ch chan []byte) *Intercepter {
 	pr, pw := io.Pipe()
-	return &Intercepter{pr: pr, pw: pw}
+	if ch == nil { // run dummy
+		ch = make(chan []byte)
+		go func() {
+			for b := range ch {
+				_ = b
+			}
+		}()
+	}
+	return &Intercepter{pr: pr, pw: pw, listener: ch}
 }
 
 // Header is returning header map
@@ -29,6 +39,7 @@ func (x *Intercepter) Header() http.Header {
 
 // Write will intercept bytes
 func (x Intercepter) Write(buf []byte) (int, error) {
+	x.listener <- buf
 	return x.pw.Write(buf)
 }
 
@@ -52,15 +63,9 @@ func (x *Intercepter) WriteHeader(statusCode int) {
 	x.StatusCode = statusCode
 }
 
-// CloseNotify is dummy
-func (Intercepter) CloseNotify() <-chan bool {
-	return make(chan bool)
-}
-
 var (
 	// check interface
 	_ http.ResponseWriter = &Intercepter{}
 	_ io.Writer           = &Intercepter{}
 	_ io.Reader           = &Intercepter{}
-	_ http.CloseNotifier  = &Intercepter{}
 )
