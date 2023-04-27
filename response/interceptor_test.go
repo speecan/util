@@ -2,7 +2,6 @@ package response
 
 import (
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -33,7 +32,7 @@ func TestInterceptor(t *testing.T) {
 	t.Run("assert response", func(tt *testing.T) {
 		tt.Parallel()
 		defer x.ReadClose()
-		b, err := ioutil.ReadAll(x)
+		b, err := io.ReadAll(x)
 		if err != nil {
 			tt.Fatal(err)
 		}
@@ -66,7 +65,7 @@ func TestInterceptorChan(t *testing.T) {
 
 	t.Run("assert response", func(tt *testing.T) {
 		tt.Parallel()
-		go io.Copy(ioutil.Discard, x)
+		go io.Copy(io.Discard, x)
 		b := <-q
 		if string(b) != "foobar" {
 			tt.Fatal("response body was unexpected,", string(b))
@@ -111,7 +110,7 @@ func TestInterceptorWithPipe(t *testing.T) {
 		tt.Parallel()
 		// b := <-q
 		defer x.ReadClose()
-		b, err := ioutil.ReadAll(x)
+		b, err := io.ReadAll(x)
 		if err != nil {
 			tt.Fatal(err)
 		}
@@ -137,7 +136,7 @@ func TestHTTPServer(t *testing.T) {
 			c.Response().Writer = w
 			w8 := make(chan error)
 			go func() {
-				body, err := ioutil.ReadAll(w)
+				body, err := io.ReadAll(w)
 				if err != nil {
 					w8 <- err
 					return
@@ -180,7 +179,7 @@ func TestHTTPServer(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer resp.Body.Close()
-	b, err := ioutil.ReadAll(resp.Body)
+	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		t.Fatal(err)
 	}
