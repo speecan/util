@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	echo "github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4"
 )
 
 func TestInterceptor(t *testing.T) {
