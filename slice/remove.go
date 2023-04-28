@@ -36,3 +36,13 @@ func isOutOfSlice[T any](src []T, i int) bool {
 	}
 	return false
 }
+
+func (me Slice[T]) Remove(i int) Slice[T] {
+	return Slice[T](Remove(me, i))
+}
+func (me Slice[T]) RemoveCopy(i int) Slice[T] {
+	return Slice[T](RemoveCopy(me, i))
+}
+func (me Slice[T]) RemoveUnsorted(i int) Slice[T] {
+	return Slice[T](RemoveUnsorted(me, i))
+}
