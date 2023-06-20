@@ -51,3 +51,11 @@ func BenchmarkDecryptGCM(b *testing.B) {
 		}
 	}
 }
+
+func TestAvoidConfusableCharactersSet(t *testing.T) {
+	expected := "ACDFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstwxyz245679"
+	res := avoidConfusableCharactersSet()
+	if res != expected {
+		t.Fatal(res, expected)
+	}
+}

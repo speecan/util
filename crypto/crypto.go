@@ -4,11 +4,26 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"regexp"
 
 	"github.com/labstack/gommon/random"
 
 	"golang.org/x/crypto/bcrypt"
 )
+
+var (
+	randomAlphanumericWithoutConfusable string
+)
+
+func init() {
+	randomAlphanumericWithoutConfusable = avoidConfusableCharactersSet()
+}
+
+func avoidConfusableCharactersSet() string {
+	confusable := "1lI0Oo8B3Evu"
+	re := regexp.MustCompile(`[` + confusable + `]`)
+	return re.ReplaceAllString(random.Alphanumeric, "")
+}
 
 // HashPassword returns password hash
 func HashPassword(password string) (string, error) {
@@ -25,6 +40,11 @@ func CheckPasswordHash(password, hash string) bool {
 // Random returns random string with random.Alphanumeric
 func Random(n int) string {
 	return random.String(uint8(n), random.Alphanumeric)
+}
+
+// RandomWithoutConfusable returns random string with avoiding confusable characters
+func RandomWithoutConfusable(n int) string {
+	return random.String(uint8(n), randomAlphanumericWithoutConfusable)
 }
 
 // EncryptByGCM aes-gcm
