@@ -31,6 +31,10 @@ func TestIsContained(t *testing.T) {
 	if res == true {
 		t.Errorf("%s: must be not parsed", ip)
 	}
+	res = IsContained("192.168.100.50", []string{})
+	if res == true {
+		t.Errorf("empty list must contain no ip")
+	}
 }
 
 func TestListContains(t *testing.T) {
